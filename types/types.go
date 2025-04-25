@@ -23,9 +23,9 @@ type Product struct {
 }
 
 type Cart struct {
-	UserId   int      `json:"user_id"`
-	Products   []Product `json:"products"`
-	TotalPrice float64   `json:"total_price"`
+    UserId     int        `json:"user_id" bson:"userid"`
+    Products   []Product  `json:"products" bson:"products"`
+    TotalPrice float64    `json:"total_price" bson:"totalprice"`
 }
 
 type Order struct {

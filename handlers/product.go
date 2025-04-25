@@ -74,7 +74,7 @@ func GetProductByID(c *gin.Context) {
 	objID, err := primitive.ObjectIDFromHex(productID)
 	if err != nil {
 		c.JSON(400, gin.H{"error": "Invalid product ID format"})
-		return
+		return 
 	}
 
 	collection := utils.MongoDB.Collection("products")
@@ -84,9 +84,8 @@ func GetProductByID(c *gin.Context) {
 	err = collection.FindOne(ctx, bson.M{"_id": objID}).Decode(&product)
 	if err != nil {
 		c.JSON(404, gin.H{"error": "Product not found"})
-		return
+		return 
 	}
-
 	c.JSON(200, gin.H{"product": product})
 }
 
@@ -96,7 +95,6 @@ func UpdateProduct(c *gin.Context) {
 		c.JSON(400, gin.H{"error": "Invalid Product Details"})
 		return
 	}
-
 	product.UpdatedAt = time.Now().Format(time.RFC3339)
 
 	// Convert ID from string to ObjectID

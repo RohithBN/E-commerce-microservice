@@ -43,11 +43,15 @@ func main() {
 	auth := router.Group("/auth")
 	auth.Use(middlewares.AuthMiddleware())
 	{
+		//product routes
 		auth.GET("/products", handlers.GetProducts)
 		auth.POST("/add-product", handlers.AddProduct)
 		auth.GET("/products/:id", handlers.GetProductByID)
 		auth.PUT("/update-product/:id", handlers.UpdateProduct)
 		auth.DELETE("/delete-product/:id", handlers.DeleteProduct)
+
+		//cart routes
+		auth.POST("/add-to-cart/:productId", handlers.AddToCart)
 	}
 
 	router.Run(":8080")
