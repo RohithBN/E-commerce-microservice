@@ -53,6 +53,12 @@ func main() {
 		//cart routes
 		auth.POST("/add-to-cart/:productId", handlers.AddToCart)
 		auth.GET("/cart", handlers.GetCart)
+
+		//order routes
+		auth.POST("/create-order", handlers.CreateOrder)
+		auth.POST("/orders/payment", handlers.ProcessPayment)
+		auth.PUT("/orders/:orderId/status", handlers.UpdateOrderStatus)
+		auth.GET("/orders", handlers.GetOrders)
 	}
 
 	router.Run(":8080")

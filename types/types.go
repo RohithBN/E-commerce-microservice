@@ -29,7 +29,7 @@ type Cart struct {
 }
 
 type Order struct {
-	UserId       User      `json:"user_id"`
+	UserId       int      `json:"user_id"`
 	OrderId      primitive.ObjectID `json:"order_id" bson:"_id,omitempty"`
 	Products   []Product `json:"products"`
 	TotalPrice float64   `json:"total_price"`
