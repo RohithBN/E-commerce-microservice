@@ -52,6 +52,7 @@ func main() {
 
 		//cart routes
 		auth.POST("/add-to-cart/:productId", handlers.AddToCart)
+		auth.GET("/cart", handlers.GetCart)
 	}
 
 	router.Run(":8080")
