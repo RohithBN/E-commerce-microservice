@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/RohithBN/types"
-	"github.com/RohithBN/utils"
+	"github.com/RohithBN/shared/types"
+	"github.com/RohithBN/shared/utils"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

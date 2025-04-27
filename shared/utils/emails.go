@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/RohithBN/types"
+	"github.com/RohithBN/shared/types"
 )
 
 type EmailConfig struct {

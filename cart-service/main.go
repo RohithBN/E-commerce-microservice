@@ -1,0 +1,30 @@
+package main
+
+import (
+	"log"
+
+	"github.com/RohithBN/cart-service/handlers"
+	"github.com/RohithBN/shared/utils"
+	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+)
+
+func main() {
+	if err := godotenv.Load("../.env"); err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	if err := utils.ConnectMongoDB(); err != nil {
+		log.Fatalf("Error connecting to MongoDB: %v", err)
+	}
+
+	router := gin.Default()
+
+	// Routes aligned with gateway
+	router.POST("/cart/:productId", handlers.AddToCart)
+	router.GET("/cart", handlers.GetCart)
+	router.DELETE("/cart/:productId", handlers.DeleteFromCart)
+
+	log.Printf("Cart service starting on port 8083")
+	router.Run(":8083")
+}

@@ -6,8 +6,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/RohithBN/types"
-	"github.com/RohithBN/utils"
+	"github.com/RohithBN/shared/types"
+	"github.com/RohithBN/shared/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/jackc/pgx/v4"
@@ -101,7 +101,7 @@ func Login(c *gin.Context) {
 		c.JSON(401, gin.H{"error": "Invalid password"})
 		return
 	}
-	tokenString, err := GenerateJWT(user)
+	tokenString, err := GenerateJWT(&user)
 	if err != nil {
 		c.JSON(500, gin.H{"error": "Failed to generate token",
 			"details": err.Error()})
@@ -115,22 +115,18 @@ func Login(c *gin.Context) {
 	})
 
 }
+func GenerateJWT(user *types.User) (string, error) {
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["id"] = user.Id
+	claims["email"] = user.Email
+	claims["name"] = user.Name
+	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
 
-func GenerateJWT(user types.User) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
-		jwt.MapClaims{
-			"id":    user.Id,
-			"name":  user.Name,
-			"email": user.Email,
-			"exp":   time.Now().Add(time.Hour * 24).Unix(),
-		})
-	tokenString, err := token.SignedString(secretKey)
-	if err != nil {
-		return "", err
-	}
-
-	return tokenString, nil
+	// Make sure we're using the same secret key as in .env
+	return token.SignedString([]byte(os.Getenv("JWT_SECRET_KEY")))
 }
+
 
 func ValidateJWT(tokenString string) (jwt.Claims, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
