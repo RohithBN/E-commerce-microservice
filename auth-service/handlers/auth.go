@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/RohithBN/auth-service/kafka"
 	"github.com/RohithBN/shared/types"
 	"github.com/RohithBN/shared/utils"
 	"github.com/gin-gonic/gin"
@@ -63,6 +64,15 @@ func Register(c *gin.Context) {
 		return
 	}
 	Users = append(Users, user)
+
+	//send Message to kafka 
+
+	err=kafka.ProduceEmail(user.Email,user.Name,user.CreatedAt)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "Failed to send message to Kafka",
+			"details": err.Error()})
+		return
+	}
 
 	c.JSON(200, gin.H{
 		"message": "User registered successfully",

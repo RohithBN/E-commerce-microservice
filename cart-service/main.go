@@ -2,8 +2,8 @@ package main
 
 import (
 	"log"
-
 	"github.com/RohithBN/cart-service/handlers"
+	"github.com/RohithBN/cart-service/kafka"
 	"github.com/RohithBN/shared/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -17,6 +17,11 @@ func main() {
 	if err := utils.ConnectMongoDB(); err != nil {
 		log.Fatalf("Error connecting to MongoDB: %v", err)
 	}
+
+	//inititalise kafka writer
+	kafka.InitKafkaWriter()
+
+	//Start kafka Consumer
 
 	router := gin.Default()
 

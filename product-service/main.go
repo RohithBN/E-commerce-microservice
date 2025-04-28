@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"log"
 
 	"github.com/RohithBN/product-service/handlers"
+	"github.com/RohithBN/product-service/kafka"
 	"github.com/RohithBN/shared/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -17,6 +19,14 @@ func main() {
 	if err := utils.ConnectMongoDB(); err != nil {
 		log.Fatalf("Error connecting to MongoDB: %v", err)
 	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go func() {
+		if err := kafka.ConsumeCartAddItemWithContext(ctx); err != nil {
+			log.Printf("Error starting Kafka consumer: %v", err)
+		}
+	}()
 
 	router := gin.Default()
 
