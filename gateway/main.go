@@ -5,8 +5,10 @@ import (
 
 	"github.com/RohithBN/gateway/handlers"
 	"github.com/RohithBN/gateway/middleware"
+	"github.com/RohithBN/shared/metrics"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
@@ -15,7 +17,9 @@ func main() {
 	}
 
 	router := gin.Default()
+	router.Use(metrics.PrometheusMiddleware())
 
+	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
 	// Public routes
 	router.POST("/api/register", handlers.ProxyHandler("auth", "/register"))
 	router.POST("/api/login", handlers.ProxyHandler("auth", "/login"))

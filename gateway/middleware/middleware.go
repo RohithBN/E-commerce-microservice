@@ -11,7 +11,6 @@ import (
 func AuthMiddleware() gin.HandlerFunc {
     return func(c *gin.Context) {
         // Add debug logging
-        fmt.Printf("JWT_SECRET_KEY: %s\n", os.Getenv("JWT_SECRET_KEY"))
         
         authHeader := c.GetHeader("Authorization")
         if authHeader == "" {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/RohithBN/shared/metrics"
 	"github.com/segmentio/kafka-go"
 )
 
@@ -27,8 +28,14 @@ func ProduceCartAddItem(quantity int, productId string, userId int) error {
 	payload, _ := json.Marshal(event)
 
 
-	return writer.WriteMessages(context.Background(), kafka.Message{
+	err:= writer.WriteMessages(context.Background(), kafka.Message{
 		Key:   []byte(productId),
 		Value: payload,
 	})
+	if err != nil {
+		metrics.KafkaOperations.WithLabelValues("cart-add-item-topic","produce","error").Inc()
+		return err;
+	}
+	metrics.KafkaOperations.WithLabelValues("cart-add-item-topic","produce","success").Inc()
+	return nil
 }

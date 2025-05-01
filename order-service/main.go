@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/RohithBN/order-service/handlers"
+	"github.com/RohithBN/shared/metrics"
 	"github.com/RohithBN/shared/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -19,6 +20,9 @@ func main() {
 	}
 
 	router := gin.Default()
+	router.Use(metrics.PrometheusMiddleware())
+
+	metrics.RegisterMetricsEndpoint(router)
 
 	router.POST("/create-order", handlers.CreateOrder)
 	router.POST("/orders/payment", handlers.ProcessPayment)

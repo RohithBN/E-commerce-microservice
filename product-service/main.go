@@ -6,6 +6,7 @@ import (
 
 	"github.com/RohithBN/product-service/handlers"
 	"github.com/RohithBN/product-service/kafka"
+	"github.com/RohithBN/shared/metrics"
 	"github.com/RohithBN/shared/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -29,6 +30,10 @@ func main() {
 	}()
 
 	router := gin.Default()
+
+	router.Use(metrics.PrometheusMiddleware())
+
+	metrics.RegisterMetricsEndpoint(router)
 
 	router.GET("/products", handlers.GetProducts)
 	router.POST("/add-product", handlers.AddProduct)

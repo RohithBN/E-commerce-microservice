@@ -2,8 +2,10 @@ package main
 
 import (
 	"log"
+
 	"github.com/RohithBN/cart-service/handlers"
 	"github.com/RohithBN/cart-service/kafka"
+	"github.com/RohithBN/shared/metrics"
 	"github.com/RohithBN/shared/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -21,9 +23,11 @@ func main() {
 	//inititalise kafka writer
 	kafka.InitKafkaWriter()
 
-	//Start kafka Consumer
-
 	router := gin.Default()
+
+	router.Use(metrics.PrometheusMiddleware())
+
+	metrics.RegisterMetricsEndpoint(router)
 
 	// Routes aligned with gateway
 	router.POST("/cart/:productId", handlers.AddToCart)

@@ -1,0 +1,20 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  - job_name: 'auth-service'
+    static_configs:
+      - targets: ['<auth-service-ip>:8081']
+
+  - job_name: 'product-service'
+    static_configs:
+      - targets: ['<product-service-ip>:8082']
+
+  - job_name: 'cart-service'
+    static_configs:
+      - targets: ['<cart-service-ip>:8083']
+
+  - job_name: 'order-service'
+    static_configs:
+      - targets: ['<order-service-ip>:8084']
