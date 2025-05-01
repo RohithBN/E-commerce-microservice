@@ -2,8 +2,12 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"log"
 	"time"
 
+	"github.com/RohithBN/shared/redis"
 	"github.com/RohithBN/shared/types"
 	"github.com/RohithBN/shared/utils"
 	"github.com/gin-gonic/gin"
@@ -74,7 +78,23 @@ func GetProductByID(c *gin.Context) {
 	objID, err := primitive.ObjectIDFromHex(productID)
 	if err != nil {
 		c.JSON(400, gin.H{"error": "Invalid product ID format"})
-		return 
+		return
+	}
+
+	// Check Redis cache first
+	cachedProduct, err := redis.RedisClient.Get(context.Background(), "product:"+productID).Result()
+	if err == nil {
+		// Deserialize the cached JSON string back to a product
+		var cachedProductObj types.Product
+		if err := json.Unmarshal([]byte(cachedProduct), &cachedProductObj); err != nil {
+			// Log error but continue to fetch from DB
+			log.Printf("Error unmarshaling cached product: %v", err)
+		} else {
+			// Successfully retrieved and deserialized from cache
+			fmt.Println("Cache hit")
+			c.JSON(200, gin.H{"product": cachedProductObj})
+			return
+		}
 	}
 
 	collection := utils.MongoDB.Collection("products")
@@ -84,8 +104,20 @@ func GetProductByID(c *gin.Context) {
 	err = collection.FindOne(ctx, bson.M{"_id": objID}).Decode(&product)
 	if err != nil {
 		c.JSON(404, gin.H{"error": "Product not found"})
-		return 
+		return
 	}
+	productJSON, err := json.Marshal(product)
+    if err != nil {
+        // Log error but continue to return the product
+        log.Printf("Error serializing product for cache: %v", err)
+    } else {
+        // Set with 30 minute expiration
+        if err := redis.RedisClient.Set(ctx, "product:"+productID, productJSON, 30*time.Minute).Err(); err != nil {
+            // Log error but don't fail the request
+            log.Printf("Failed to cache product: %v", err)
+        }
+    }
+
 	c.JSON(200, gin.H{"product": product})
 }
 
@@ -110,17 +142,17 @@ func UpdateProduct(c *gin.Context) {
 	defer cancel()
 
 	update := bson.M{
-		"name":         product.Name,
-		"price":        product.Price,
-		"description":  product.Description,
-		"updated_at":   product.UpdatedAt,
+		"name":          product.Name,
+		"price":         product.Price,
+		"description":   product.Description,
+		"updated_at":    product.UpdatedAt,
 		"added_to_cart": product.AddedToCart,
-		"category":     product.Category,
-		"stock":        product.Stock,
+		"category":      product.Category,
+		"stock":         product.Stock,
 	}
-	
+
 	_, err = collection.UpdateOne(ctx, bson.M{"_id": objID}, bson.M{"$set": update})
-		if err != nil {
+	if err != nil {
 		c.JSON(500, gin.H{"error": "Failed to update product"})
 		return
 	}

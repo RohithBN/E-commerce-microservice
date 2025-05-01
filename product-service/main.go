@@ -7,6 +7,7 @@ import (
 	"github.com/RohithBN/product-service/handlers"
 	"github.com/RohithBN/product-service/kafka"
 	"github.com/RohithBN/shared/metrics"
+	"github.com/RohithBN/shared/redis"
 	"github.com/RohithBN/shared/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -19,6 +20,11 @@ func main() {
 
 	if err := utils.ConnectMongoDB(); err != nil {
 		log.Fatalf("Error connecting to MongoDB: %v", err)
+	}
+
+		if err:=redis.ConnectRedis(); 
+		err != nil {
+		log.Fatalf("Error connecting to Redis: %v", err)
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
