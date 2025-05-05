@@ -27,6 +27,7 @@ func main() {
 	// Protected routes
 	api := router.Group("/api")
 	api.Use(middleware.AuthMiddleware())
+	api.Use(middleware.RateLimitMiddleware())
 	{
 		// Products
 		api.GET("/products", handlers.ProxyHandler("products", "/products"))
@@ -41,6 +42,8 @@ func main() {
 		api.DELETE("/cart/:productId", handlers.ProxyHandler("cart", "/cart/:productId"))
 		// Orders
 		api.POST("/create-order", handlers.ProxyHandler("orders", "/create-order"))
+		api.POST("/orders/send-otp", handlers.ProxyHandler("orders", "/orders/send-otp"))
+		api.POST("/orders/verify-otp", handlers.ProxyHandler("orders", "/orders/verify-otp"))
 		api.POST("/orders/payment", handlers.ProxyHandler("orders", "/orders/payment"))
 		api.PUT("/orders/:orderId/status", handlers.ProxyHandler("orders", "/orders/:orderId/status"))
 		api.GET("/orders", handlers.ProxyHandler("orders", "/orders"))

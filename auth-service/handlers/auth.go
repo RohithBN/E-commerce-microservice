@@ -138,13 +138,5 @@ func GenerateJWT(user *types.User) (string, error) {
 }
 
 
-func ValidateJWT(tokenString string) (jwt.Claims, error) {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		return secretKey, nil
-	})
-	if err != nil || !token.Valid {
-		return nil, fmt.Errorf("invalid token")
-	}
-	return token.Claims, nil
-}
+
 

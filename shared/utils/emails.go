@@ -1,11 +1,15 @@
 package utils
 
 import (
+	"context"
 	"fmt"
+	"math/rand"
 	"net/smtp"
 	"os"
 	"strings"
+	"time"
 
+	"github.com/RohithBN/shared/redis"
 	"github.com/RohithBN/shared/types"
 )
 
@@ -140,4 +144,53 @@ func SendOrderConfirmationEmail(toEmail string, order *types.Order) error {
     `, orderIDString[:8], order.TotalPrice, order.Status, order.CreatedAt)
 
 	return SendEmail([]string{toEmail}, subject, body)
+}
+
+func SendOTPMail(email string, createdAt string) error {
+	uniqueCode := generateUniqueCode()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	err := redis.RedisClient.Set(ctx, email, uniqueCode,  10*time.Minute).Err()
+	if err != nil {
+		return fmt.Errorf("failed to set OTP in Redis: %v", err)
+	}
+    fmt.Println("OTP set in Redis:", uniqueCode)
+	subject := "Your OTP Code - E-Commerce Store"
+	body := fmt.Sprintf(`
+
+        <html>
+        <head>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                .header { background-color: #4CAF50; color: white; padding: 20px; text-align: center; }
+                .footer { text-align: center; margin-top: 20px; color: #666; }
+            </style>
+        </head>
+        <body>
+
+            <div class="container">
+                <div class="header">
+                    <h1>Your OTP Code</h1>
+                </div>
+                <p>Dear User,</p>
+                <p>Your OTP code is: <strong>%s</strong></p>
+                <p>This code is valid for a short period of time. Please use it to complete your registration.</p>
+                <p>If you did not request this code, please ignore this email.</p>
+                <div class="footer">
+
+                    <p>Thank you for using our service!</p>
+                    <small>This is an automated email, please do not reply.</small>
+                </div>
+            </div>
+        </body>
+        </html>
+    `, uniqueCode)
+    fmt.Println("Sending OTP email to:", email)
+	return SendEmail([]string{email}, subject, body)
+}
+
+func generateUniqueCode() string {
+	// Generate a unique code (e.g., a random 6-digit number)
+	return fmt.Sprintf("%06d", rand.Intn(1000000))
 }

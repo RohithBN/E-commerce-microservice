@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -29,6 +30,8 @@ func AddToCart(c *gin.Context) {
 		c.JSON(401, gin.H{"error": "User ID not found"})
 		return
 	}
+
+	fmt.Println("My user Id :", userIdStr)
 
 	user_id, err := strconv.Atoi(userIdStr)
 	if err != nil {
@@ -65,14 +68,14 @@ func AddToCart(c *gin.Context) {
 		newCart := types.Cart{
 			UserId:     user_id,
 			Products:   products,
-			TotalPrice: product.Price*float64(quantity),
+			TotalPrice: product.Price * float64(quantity),
 		}
 		_, err := cartCollection.InsertOne(ctx, newCart)
 		if err != nil {
 			c.JSON(500, gin.H{"error": "Failed to create cart"})
 			return
 		}
-		// send Message to Kafka 
+		// send Message to Kafka
 
 		c.JSON(200, gin.H{"message": "Product added to new cart", "cart": newCart})
 		return
@@ -87,7 +90,7 @@ func AddToCart(c *gin.Context) {
 		for i := 0; i < quantity; i++ {
 			cart.Products = append(cart.Products, product)
 		}
-		cart.TotalPrice += product.Price*float64(quantity)
+		cart.TotalPrice += product.Price * float64(quantity)
 		_, err = cartCollection.UpdateOne(
 			ctx,
 			bson.M{"userid": user_id},
@@ -102,7 +105,7 @@ func AddToCart(c *gin.Context) {
 		}
 	}
 	// update product stock
-	if err:=kafka.ProduceCartAddItem(quantity,productId, user_id); err != nil {
+	if err := kafka.ProduceCartAddItem(quantity, productId, user_id); err != nil {
 		c.JSON(500, gin.H{"error": "Failed to produce message to Kafka"})
 		return
 	}
